@@ -1,7 +1,9 @@
 ﻿CheckVSIncludes
 ===============
 
-No it's is NOT `Check` versus `Includes`, this Node module is to check that your **V**isual **S**tudio includes are O.K.
+**Note**: This module is still under construction (v0.1). Please wait for the v1.0 release before using.
+
+This Node module is to check that your **V**isual **S**tudio includes are O.K.
 
 It might be a shock to some but yes, Microsoft is coming to Node.js, or actually has been coming for a while. They're finally following, but they'll probably be taking lot's of new developers for them. Below I'll give some situations this module can help you, but since you're reading you probably just want to use it, so let's dive straight into how to do that.
 
