@@ -8,7 +8,7 @@
  - Add check that there are no `.cshtml' with build action `None` (can also cause deploy bugs)
 
 Using Visual Studio Web Deploy and had some nasty issues because files were not **included** in your project?
-Do you want to prevent this from ever happening again? Well I did, and because I couldn't find a generic solution to it yet - not even on [Stack Overflow](http://stackoverflow.com/questions/7271471/how-do-i-find-files-that-are-missing-from-visual-studio-projects) - so I created this Node application.
+Do you want to prevent this from ever happening again? Well I did, and because I couldn't find a generic solution to it yet - not even on [Stack Overflow](http://stackoverflow.com/questions/7271471/how-do-i-find-files-that-are-missing-from-visual-studio-projects) - I created this Node application.
 
 ### How to use it
 - [Install Node](https://nodejs.org) - if you didn't have it yet.
@@ -53,6 +53,6 @@ When your project uses Visual Studio's Web deploy it is necessary that every fil
 
 But even with only Visual Studio afficionado's in your team, files can be missing due to merging the .csproj files for instance with GIT, and then lazily choosing. The project is running fine on your localhost, but after you deploy, things can go haywire. Once this happens a manager might insist to add a bullet point in your deploy scrip to check that all files are included. But if you're working on a project of any real-life size this means you'll have to manually open 100 folders or more.
 
-###What do you mean with 'includes'?
+### What do you mean with 'includes'?
 Visual Studio (VS) - Microsoft's main IDE - organizes it's files into a **solution**, and a solution consists of one or more `projects`. As most VS developers will know all the files that are included in the project are listed in the internal .csproj file. This is simply an XML file.
 
