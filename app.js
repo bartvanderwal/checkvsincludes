@@ -16,8 +16,8 @@ var nrOfCheckedFiles = 0,
     nrOfNotIncludedFiles = 0,
     notIncludedFiles = [],
     maxFilesToShowDefault = 20,
-    options = {};
-
+    options = {},
+    basePath;
 
 // Polyfills for ES6 functions.
 if (!String.prototype.startsWith) {
@@ -113,16 +113,42 @@ function readCsProjeFile(csProjFilename) {
 }
 
 
-function searchFilesNotIncludedIn(csProjFilename, filter) {
+// Determine the filename of the .csproj file, if not provided.
+function getCsProjFile(csProjFilename) {
     return new Promise(function (resolve, reject) {
+        // If csproj filename was provided then simply return that one :)
+        if (typeof csProjFilename !== 'undefined' && csProjFilename) {
+            resolve(csProjFilename);
+        } else {
+            // Try to get a .csproj file from the (root of) the current working directory (with node-glob).
+            glob('*.csproj', { cwd: options.cwd }, function(err, files) {
+                if ((files.length) === 0) {
+                    reject('No .csproj was found in the current working directory, check-vs-includes cannot run!');
+                    return;
+                }
+                if (files.length > 1) {
+                    reject('More than one .csproj file was found in the working directory. Please specify an explicit .csproj file in the \'csproj\' parameter, or (temporarily) change the extension of the rest from \'.csproj\' so only one is left:\n' + files.join('\n'));
+                    return;
+                }
+                csProjFilename = files[0];
+                csProjFilename = options.cwd + csProjFilename;
+                resolve(csProjFilename);
+            });
+        }
+    });
+}
+
+
+function searchFilesNotIncludedIn(csProjFilename, filter) {
+    return new Promise(function(resolve, reject) {
         if (filter.length === 0) {
             reject('No stuff to check!');
             return;
         }
         var includedFiles = [];
-        var basePath = getBasePath(csProjFilename);
+        
         readCsProjeFile(csProjFilename)
-            .then(function(result) {
+        .then(function(result) {
             return new Promise(function (resolve, reject) {
                 if (!result || result.length === 0) reject('No files in result');
                 nrOfIncludedFiles = result.length;
@@ -180,10 +206,9 @@ function searchFilesNotIncludedIn(csProjFilename, filter) {
 }
 
 
-function check(patterns, userOptions, csproj) {    
+function check(patterns, userOptions, csProj) {    
     var defaultOptions = {
-        csProjFilename: 'Perflectie.Web.csproj',
-        cwd: '../Perflectie.Web',
+        cwd: '.',
         maxFilesToShow: maxFilesToShowDefault,
         verbose: false
     };
@@ -215,14 +240,23 @@ function check(patterns, userOptions, csproj) {
             patternList[patternKey] = options.cwd + pattern;
         });
         // And prefix the .csproj file with the base path as well.
-        options.csProjFilename = options.cwd + options.csProjFilename;
+        if (typeof csProj !== 'undefined' && csProj ) {
+            options.csProjFilename = options.cwd + csProj;
+        }
     }
 
     var message;
-    searchFilesNotIncludedIn(options.csProjFilename, options.stuffToCheck).then(function (notIncludedFiles) {
+    getCsProjFile(options.csProjFilename).then(function(csProjFilename) {
+        basePath = getBasePath(csProjFilename);
+        options.csProjFilename = csProjFilename;
+        return csProjFilename;
+    }).then(function() {
+        return searchFilesNotIncludedIn(options.csProjFilename, options.stuffToCheck);
+    })
+    .then(function(notIncludedFiles) {
         var nrOfNotIncludedFiles = notIncludedFiles.length;
         if (nrOfNotIncludedFiles > 0) {
-            message = 'There ' + (nrOfNotIncludedFiles == 1 ? 'is ' : 'are ') + nrOfNotIncludedFiles + ' of the total ' + nrOfCheckedFiles + ' checked files NOT included in \'' + options.csProjFilename + '\':';
+            message = 'There ' + (nrOfNotIncludedFiles === 1 ? 'is ' : 'are ') + nrOfNotIncludedFiles + ' of the total ' + nrOfCheckedFiles + ' checked files NOT included in \'' + options.csProjFilename + '\':';
             console.log(message);
             var limitResultsShown = options.maxFilesToShow > 0;
             var notIncludedFilesShown = limitResultsShown ? notIncludedFiles.slice(0, options.maxFilesToShow) : notIncludedFiles;
@@ -231,11 +265,11 @@ function check(patterns, userOptions, csproj) {
                 message += "\n" + filename;
             });
             if (limitResultsShown && nrOfNotIncludedFiles > options.maxFilesToShow) {
-                var subMessage = 'Only the first ' + options.maxFilesToShow + ' are shown. Change \'maxFilesToShow\' parameter to show more (or less) (default: ' + maxFilesToShowDefault + ')';
+                var subMessage = 'Only the first ' + options.maxFilesToShow + ' files are shown (you can change \'maxFilesToShow\' parameter, default: ' + maxFilesToShowDefault + ')';
                 console.log(subMessage);
             }
         } else {
-            message = 'All ' + nrOfCheckedFiles + ' checked files are included in \'' + options.csProjFilename + '\'.'
+            message = 'All ' + nrOfCheckedFiles + ' checked files are included in \'' + options.csProjFilename + '\'.';
             console.log(message);
         }
     }).catch(function(error) {
@@ -243,6 +277,4 @@ function check(patterns, userOptions, csproj) {
     });
 }
 
-exports.check = check;
-
-check(['/Content/**/*.*', '/app/**/*.*'], { cwd: '../Perflectie.Web' }, 'Perflectie.Web.csproj');
+module.exports = check;

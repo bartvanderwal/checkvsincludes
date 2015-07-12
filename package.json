@@ -1,6 +1,6 @@
 {
   "name": "check-vs-includes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Checks that your Visual Studio includes are in fine order",
   "main": "app.js",
   "repository": {
