@@ -1,7 +1,7 @@
 {
-  "name": "Check VS Includes",
+  "name": "check-vs-includes",
   "version": "0.1.0",
-  "description": "Checks your Visual Studio includes are in fine order",
+  "description": "Checks that your Visual Studio includes are in fine order",
   "main": "app.js",
   "repository": {
     "type": "git",
@@ -16,20 +16,23 @@
     "csproj"
   ],
   "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/bartvanderwal/checkvsincludes/issues"
-    },
-    "author": {
+  "bugs": {
+    "url": "https://github.com/bartvanderwal/checkvsincludes/issues"
+  },
+  "author": {
     "name": "Bart van der Wal",
     "email": "bartvanderwal@gmail.com"
   },
   "dependencies": {
-    "clone": "^1.0.2",
+    "extend": "^3.0.0",
     "glob": "^5.0.13",
     "lodash": "^3.10.0",
     "minimatch": "^2.0.8",
     "promise": "^7.0.3",
     "upath": "^0.1.5",
     "xml2js": "^0.4.9"
+  },
+  "devDependencies": {
+    "karma": "^0.12.37"
   }
 }
