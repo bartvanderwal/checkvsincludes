@@ -16,17 +16,29 @@ Do you want to prevent this from ever happening again? Well I did, and because I
 - Add a Grunt or Gulp task (see below)
 - Since you're using Visual Studio anyway you might prefer to install  [Task Runner Explorer extension](https://visualstudiogallery.msdn.microsoft.com/8e1b4368-4afb-467a-bc13-9650572db708) instead of using the command line.
 
-### Gulp t
+### Gulp task
 Create a 'gulpfile.js' in your project and add a task: 
 
 ```javascript
   var checkVSIncludes = require('check-vs-includes');
   ...
 
-  gulp.task('checkVSIncludes', function(cb) {
-     checkVSIncludes(['/Content/**/*.less', '/app/**/*.js'], { cwd: 'MyApp.Web' });
-  });
+    gulp.task('checkVSIncludes', function(cb) {
+        checkVSIncludes(['/Content/**/*.less', '/app/**/*.js']);
+    });
 ```
+
+This example let's it check that all `.js` and `.less` files in the specified folders are included in your project file. Notice that you use [glob](https://github.com/isaacs/node-glob)s `/Content/**/*.less` to specify to take all files in the directory but also all those in any subdirectory, subsubdirectory etc.
+
+Optionally you can specify an options object as a second parameter with for instance an alternative working directory `cwd`. You can check the source code for some more options, it's all on GitHub (pull requests are welcome).
+
+The app will autodetect the `.csproj` file in the specified folder, and check all the 'fysical' files in the folder against this. If autodetection doesn't work, you can also specify an explicit `.csproj` filename via a third parameter. For instance if there are two .cspoj files in the folder (an old backup version or something):
+
+    gulp.task('checkVSIncludes', function(cb) {
+        checkVSIncludes('/Content/**/*.css', { cwd: 'MyApp.Web', debug }, 'MyApp.Web');
+    });
+
+Notice in this example that for the first paramter instead of an array of strings you can also specify a single string if there is only one glob pattern you want to check against. Beware of specifying `*.*` (or `**/*.*`) especially if your project includes a `node_modules` folder, as these can contain A LOT of files/folders and will slow down the check or even cause a 'hang'.
 
 ### Grunt task
 I don't know, I'm not a gruntee :P. But input is welcome!
