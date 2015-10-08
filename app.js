@@ -97,6 +97,9 @@ function readCsProjeFile(csProjFilename) {
                     }
                     _.each(itemGroup.Content, function(content, contentKey, contentList) {
                         // 6. Filter uit de fileContents alle <Content Include="x"> uit alle <ItemGroups> en sla elk van deze 'x'-en op in een array 'includedFiles'
+                         if (content && content.Link) {
+                            fileIncludes.push(content.Link[0]);
+                        } else
                         if (content && content.$ && content.$.Include /* && content.$.Include.endsWith('.js') */) {
                             fileIncludes.push(content.$.Include);
                         }
