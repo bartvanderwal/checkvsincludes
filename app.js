@@ -74,7 +74,7 @@ function getBasePath(pathAndFile) {
 function readCsProjeFile(csProjFilename) {
     var fileIncludes = [];
     var parser = new xml2js.Parser();
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         fs.readFile(csProjFilename, function (err, data) {
             if (err) {
                 reject('File \'' + csProjFilename + '\' not found.');
@@ -85,25 +85,30 @@ function readCsProjeFile(csProjFilename) {
                 if (!itemgroups || itemgroups.length === 0) {
                     reject('No item groups found in ' + csProjFilename);
                 }
-                _.each(result.Project.ItemGroup, function(itemGroup, groupKey, groupList) {
-                    if ((!itemGroup.Content || itemGroup.Content.length === 0)) {             
-                        debug('Warning: No <Content> tags found in <ItemGroup> nr ' + groupKey + '.');
+                _.each(result.Project.ItemGroup, function (itemGroup, groupKey, groupList) {
+                    var contentItems = itemGroup.Content || [];
+                    var tsItems = itemGroup.TypeScriptCompile || [];
+                    var items = contentItems.concat(tsItems);
+
+                    if (items.length === 0) {
+                        debug('Warning: No <Content> or <TypeScriptCompile> tags found in <ItemGroup> nr ' + groupKey + '.');
                         // When we are at the last group  iteration then filling the 'fileIncludes' is done, so 'return' it.
                         if (groupKey === groupList.length - 1) {
                             resolve(fileIncludes);
                         }
                     } else {
-                        debug('Scanning ' + itemGroup.Content.length + ' <Content> tags found in <ItemGroup> nr ' + groupKey + '.');
+                        debug('Scanning ' + items.length + ' <Content> or <TypeScriptCompile> tags found in <ItemGroup> nr ' + groupKey + '.');
                     }
-                    _.each(itemGroup.Content, function(content, contentKey, contentList) {
+                    _.each(items, function (content, contentKey, contentList)
+                    {
                         // 6. Filter uit de fileContents alle <Content Include="x"> uit alle <ItemGroups> en sla elk van deze 'x'-en op in een array 'includedFiles'
-                         if (content && content.Link) {
+                        if (content && content.Link) {
                             fileIncludes.push(content.Link[0]);
                         } else
-                        if (content && content.$ && content.$.Include /* && content.$.Include.endsWith('.js') */) {
-                            fileIncludes.push(content.$.Include);
-                        }
-                        // When we are at the last item of the last group in the (nested) iteration.
+                            if (content && content.$ && content.$.Include /* && content.$.Include.endsWith('.js') */) {
+                                fileIncludes.push(content.$.Include);
+                            }
+
                         if (contentKey === contentList.length - 1 && groupKey === groupList.length - 1) {
                             // Then filling the 'fileIncludes' is done, so 'return' it.
                             resolve(fileIncludes);
